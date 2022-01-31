@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Real-time-filtering", "Real-time-filtering\Real-time-filtering.vcxproj", "{2D91C491-4CE3-4867-8D0C-87C21BABE77A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2D91C491-4CE3-4867-8D0C-87C21BABE77A}.Debug|x64.ActiveCfg = Debug|x64
+		{2D91C491-4CE3-4867-8D0C-87C21BABE77A}.Debug|x64.Build.0 = Debug|x64
+		{2D91C491-4CE3-4867-8D0C-87C21BABE77A}.Debug|x86.ActiveCfg = Debug|Win32
+		{2D91C491-4CE3-4867-8D0C-87C21BABE77A}.Debug|x86.Build.0 = Debug|Win32
+		{2D91C491-4CE3-4867-8D0C-87C21BABE77A}.Release|x64.ActiveCfg = Release|x64
+		{2D91C491-4CE3-4867-8D0C-87C21BABE77A}.Release|x64.Build.0 = Release|x64
+		{2D91C491-4CE3-4867-8D0C-87C21BABE77A}.Release|x86.ActiveCfg = Release|Win32
+		{2D91C491-4CE3-4867-8D0C-87C21BABE77A}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {44AC680B-4942-43E5-ACA5-5170E9D9FED3}
+	EndGlobalSection
+EndGlobal
