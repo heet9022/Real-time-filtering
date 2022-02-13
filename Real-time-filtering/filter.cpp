@@ -1,6 +1,5 @@
 #include "filter.h"
 
-
 int Filter::greyscale(cv::Mat& src, cv::Mat& dst) {
 
     for (int x = 0; x < src.rows; x++) {
@@ -20,12 +19,14 @@ int Filter::greyscale(cv::Mat& src, cv::Mat& dst) {
 
 int Filter::blur5x5(cv::Mat& src, cv::Mat& dst) {
 
-    Mat temp = src;
+    Mat temp(src.size(), CV_8UC3);
+    //cout << "depth: " << src.depth() <<endl;
     
     int blur[] = {1, 2, 4, 2, 1};
     int sumB = 0, sumG = 0, sumR = 0;
 
-    for (int x = 0; x < src.rows; x++) {
+
+    for (int x = 2; x < src.rows-2; x++) {
         for (int y = 2; y < src.cols-2; y++) {
             
             sumB = 0;
@@ -47,9 +48,9 @@ int Filter::blur5x5(cv::Mat& src, cv::Mat& dst) {
 
         }
     }
-    dst = temp.clone();
+
     for (int x = 2; x < temp.rows-2; x++) {
-        for (int y = 0; y < temp.cols; y++) {
+        for (int y = 2; y < temp.cols-2; y++) {
 
             sumB = 0;
             sumG = 0;
@@ -64,9 +65,9 @@ int Filter::blur5x5(cv::Mat& src, cv::Mat& dst) {
                 sumR += intensity[2] * filter_point;
             }
 
-            dst.at<Vec3b>(x, y)[0] = (int)sumB / 10;
-            dst.at<Vec3b>(x, y)[1] = (int)sumG / 10;
-            dst.at<Vec3b>(x, y)[2] = (int)sumR / 10;
+            dst.at<Vec3b>(x, y)[0] = (int) sumB / 10;
+            dst.at<Vec3b>(x, y)[1] = (int) sumG / 10;
+            dst.at<Vec3b>(x, y)[2] = (int) sumR / 10;
 
         }
     }
@@ -78,13 +79,13 @@ int Filter::sobelX3x3(cv::Mat& src, cv::Mat& dst) {
 
     int sobelX_hor[] = { -1, 0, 1 }; // 1x3
     int sobelX_ver[] = { 1,
-                          2,
-                          1 }; // 3x1
+                         2,
+                         1 }; // 3x1
 
     int sumB = 0, sumG = 0, sumR = 0;
 
-    //Mat temp2(temp.size(), CV_16SC3);
     Mat temp(src.size(), CV_16SC3);
+
     for (int x = 1; x < src.rows - 1; x++) {
         for (int y = 1; y < src.cols - 1; y++) {
 
@@ -108,10 +109,8 @@ int Filter::sobelX3x3(cv::Mat& src, cv::Mat& dst) {
         }
     }
 
-    //Mat temp2 = temp.clone();
-
-    for (int x = 1; x < src.rows - 1; x++) {
-        for (int y = 1; y < src.cols - 1; y++) {
+    for (int x = 1; x < temp.rows - 1; x++) {
+        for (int y = 1; y < temp.cols - 1; y++) {
 
             sumB = 0;
             sumG = 0;
@@ -133,8 +132,6 @@ int Filter::sobelX3x3(cv::Mat& src, cv::Mat& dst) {
         }
     }
 
-    //convertScaleAbs(temp2, dst, 1, 0);
-
     return 0;
 }
 
@@ -147,7 +144,6 @@ int Filter::sobelY3x3(cv::Mat& src, cv::Mat& dst) {
 
     int sumB = 0, sumG = 0, sumR = 0;
     
-    //Mat temp2(temp.size(), CV_16SC3);
     Mat temp(src.size(), CV_16SC3);
     for (int x = 1; x < src.rows - 1; x++) {
         for (int y = 1; y < src.cols - 1; y++) {
@@ -172,10 +168,8 @@ int Filter::sobelY3x3(cv::Mat& src, cv::Mat& dst) {
         }
     }
 
-    Mat temp2 = temp.clone();
-
-    for (int x = 1; x < src.rows-1; x++) {
-        for (int y = 1; y < src.cols - 1; y++) {
+    for (int x = 1; x < temp.rows-1; x++) {
+        for (int y = 1; y < temp.cols - 1; y++) {
 
             sumB = 0;
             sumG = 0;
@@ -196,15 +190,13 @@ int Filter::sobelY3x3(cv::Mat& src, cv::Mat& dst) {
 
         }
     }
-    
-    //convertScaleAbs(temp2, dst, 1, 0);
-
+ 
     return 0;
 }
 
 int Filter::magnitude(cv::Mat& sx, cv::Mat& sy, cv::Mat& dst) {
 
-    dst.convertTo(dst, CV_16UC3);
+    //dst.convertTo(dst, CV_16UC3);
 
     for (int i = 0; i < sx.rows; i++) {
         for (int j = 0; j < sx.cols; j++) {
@@ -213,9 +205,7 @@ int Filter::magnitude(cv::Mat& sx, cv::Mat& sy, cv::Mat& dst) {
             Vec3s y = sy.at<Vec3s>(i, j);
 
             for (int c = 0; c < sx.channels(); c++) {
-
                 dst.at<Vec3s>(i, j)[c] = sqrtf((x[c] * x[c]) + (y[c] * y[c]));
-
             }
         }
     }
@@ -224,23 +214,22 @@ int Filter::magnitude(cv::Mat& sx, cv::Mat& sy, cv::Mat& dst) {
 
 int Filter::blurQuantize(cv::Mat& src, cv::Mat& dst, int levels) {
 
-    Mat temp = src;
-    blur5x5(src, temp);
-    int b = (int) 255 / levels;
+    Mat blur(src.size(), CV_8UC3);
+    blur5x5(src, blur);
+    int b = 255 / levels;
     int xt = 0, xf = 0;
 
-    for (int i = 0; i < temp.rows; i++) {
-        for (int j = 0; j < temp.cols; j++) {
+    for (int i = 0; i < blur.rows; i++) {
+        for (int j = 0; j < blur.cols; j++) {
 
-            Vec3b intensity = temp.at<Vec3b>(i, j);
+            Vec3b intensity = blur.at<Vec3b>(i, j);
 
-            for (int c = 0; c < temp.channels(); c++) {
+            for (int c = 0; c < blur.channels(); c++) {
 
-                xt = (int) intensity[c] / b;
+                xt = intensity[c] / b;
                 xf = xt * b;
                 dst.at<Vec3b>(i, j)[c] = xf;
             }
-
         }
     }
 
@@ -250,19 +239,18 @@ int Filter::blurQuantize(cv::Mat& src, cv::Mat& dst, int levels) {
 
 int Filter::cartoon(cv::Mat& src, cv::Mat& dst, int levels, int magThreshold) {
 
-    Mat mag = src.clone();
-    Mat temp = src.clone();
-    Mat sx(src.size(), CV_16SC3);
-    Mat sy(src.size(), CV_16SC3);
+    Mat mag(src.size(), CV_16UC3);
+    Mat sx(src.size(), CV_16UC3);
+    Mat sy(src.size(), CV_16UC3);
     sobelX3x3(src, sx);
     sobelY3x3(src, sy);
     magnitude(sx, sy, mag);
-    blurQuantize(src, temp, levels);
-    dst = temp.clone();
+    blurQuantize(src, dst, levels);
+
     for (int i = 0; i < mag.rows; i++) {
         for (int j = 0; j < mag.cols; j++) {
 
-            Vec3b intensity = temp.at<Vec3b>(i, j);
+            Vec3b intensity = dst.at<Vec3b>(i, j);
             Vec3s magnitude = mag.at<Vec3s>(i, j);
 
             for (int c = 0; c < dst.channels(); c++) {
@@ -275,6 +263,23 @@ int Filter::cartoon(cv::Mat& src, cv::Mat& dst, int levels, int magThreshold) {
     }
     return 0;
 
+}
+
+int Filter::negative(cv::Mat& src, cv::Mat& dst) {
+
+    for (int i = 0; i < src.rows; i++) {
+        for (int j = 0; j < src.cols; j++) {
+
+            Vec3b intensity = src.at<Vec3b>(i, j);
+
+            for (int c = 0; c < src.channels(); c++) {
+                
+                dst.at<Vec3b>(i, j)[c] = 255 - intensity[c];
+              
+            }
+        }
+    }
+    return 0;
 }
 
 //int Filter::sobelX3x3(cv::Mat& src, cv::Mat& dst) {

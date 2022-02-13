@@ -11,6 +11,7 @@ using namespace std;
 
 Filter filter;
 
+
 int main(int argc, char* argv[]) {
     cv::VideoCapture* capdev;
     
@@ -31,6 +32,9 @@ int main(int argc, char* argv[]) {
     cv::Mat grayframe;
  
     int option = 0;
+    bool record = false;
+    bool playing = false;
+    VideoWriter oVideoWriter;
 
     for (;;) {
 
@@ -60,7 +64,7 @@ int main(int argc, char* argv[]) {
             case 3: {
                 //Gaus Filter
 
-                Mat dst = frame;
+                Mat dst(frame.size(), CV_8UC3);
                 filter.blur5x5(frame, dst);
                 frame = dst;
                 break;
@@ -88,9 +92,9 @@ int main(int argc, char* argv[]) {
             case 6: {
 
                 //Magnitude
-                Mat dst = frame.clone();
-                Mat sx(frame.size(), CV_16SC3);
-                Mat sy(frame.size(), CV_16SC3); 
+                Mat dst(frame.size(), CV_16UC3);
+                Mat sx(frame.size(), CV_16UC3);
+                Mat sy(frame.size(), CV_16UC3); 
                 filter.sobelX3x3(frame, sx);
                 filter.sobelY3x3(frame, sy);
                 filter.magnitude(sx, sy, dst);
@@ -101,7 +105,7 @@ int main(int argc, char* argv[]) {
 
                 // BlurQuantize
 
-                Mat dst = frame;
+                Mat dst(frame.size(), CV_8UC3);
                 filter.blurQuantize(frame, dst, 15);
                 frame = dst;
                 break;
@@ -111,25 +115,60 @@ int main(int argc, char* argv[]) {
 
                 // Cartoon
 
-                Mat dst = frame;
-                filter.cartoon(frame, dst, 15, 20);
+                Mat dst(frame.size(), CV_8UC3);
+                filter.cartoon(frame, dst, 18, 25);
                 frame = dst;
                 break;
             }
+
+            case 9: {
+
+                // Negative
+
+                Mat dst(frame.size(), CV_8UC3);
+                filter.negative(frame, dst);
+                frame = dst;
+                break;
+
+            }
         }
+
+        if (record) {
+            int frames_per_second;
+            Size frame_size;
+            if (!playing) {
+                frames_per_second = 10;
+                frame_size = frame.size();
+                oVideoWriter.open("SpecialEffects.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), frames_per_second, frame_size, true);
+                playing = true;
+                cout << "Recording started" << endl;
+            }
+            if (playing)
+                
+                oVideoWriter.write(frame);
+        }
+        else
+            oVideoWriter.release();
+
 
         cv::imshow("Video", frame);
 
-        // see if there is a waiting keystroke
         char key = cv::waitKey(10);
+        string name;
 
         if (key == 'q') {
             break;
         }
         else if (key == 's') {
 
-            imwrite("screenshot.jpg", frame);
-            cout << "Image saved!" << endl;
+            cout << "Name the image: ";
+            getline(cin, name);
+            imwrite(name+".jpg", frame);
+            cout << name << " saved!" << endl;
+
+        }
+        else if (key == 'o') {
+            option = 0;
         }
         else if (key == 'g') {
             option = 1;
@@ -155,7 +194,15 @@ int main(int argc, char* argv[]) {
         else if (key == 'c') {
             option = 8;
         }
+        else if (key == 'n') {
+            option = 9;
+        }
+        else if (key == 'r') {
 
+            record = !record;
+            playing = false;
+            
+        }
     }
 
     delete capdev;

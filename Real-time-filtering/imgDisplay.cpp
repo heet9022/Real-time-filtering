@@ -3,9 +3,15 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <iostream>
+#include <string>
+
+#include "filter.h"
 
 using namespace cv;
 using namespace std;
+
+Filter filter;
+Mat output;
 
 int imgDisplay()
 {
@@ -15,11 +21,71 @@ int imgDisplay()
 		cout << "Width : " << img.size().width << endl;
 		cout << "Height: " << img.size().height << endl;
 		imshow("Display window", img);
-		int a = 0;
-		while (a != 'q')
+		int key = 0;
+        int option = 0;
+        string name;
+		while (key != 'q')
 		{
-			a = waitKey(0);
-		}
+			key = waitKey(0);
+            if (key == 's') {
+
+                cout << "Name the image: "; 
+                getline(cin, name);
+                imwrite(name+".jpg", output);
+                cout << name << " saved!" << endl;
+            }
+            else if (key == 'g') {
+
+                Mat grayframe;
+                cvtColor(img, grayframe, COLOR_RGBA2GRAY, 0);
+                output = grayframe;
+            }
+            else if (key == 'h') {
+                Mat dst(img.size(), CV_8UC1);
+                filter.greyscale(img, dst);
+                output = dst;
+                
+            }
+            else if (key == 'b') {
+                Mat dst(img.size(), CV_8UC3);
+                filter.blur5x5(img, dst);
+                output = dst;
+            }
+            else if (key == 'x') {
+                Mat dst(img.size(), CV_16SC3);
+                filter.sobelX3x3(img, dst);
+                convertScaleAbs(dst, output, 1, 0);
+            }
+            else if (key == 'y') {
+                Mat dst(img.size(), CV_16SC3);
+                filter.sobelY3x3(img, dst);
+                convertScaleAbs(dst, output, 1, 0);
+
+            }
+            else if (key == 'm') {
+                Mat dst(img.size(), CV_16UC3);
+                Mat sx(img.size(), CV_16UC3);
+                Mat sy(img.size(), CV_16UC3);
+                filter.sobelX3x3(img, sx);
+                filter.sobelY3x3(img, sy);
+                filter.magnitude(sx, sy, dst);
+                convertScaleAbs(dst, output, 1, 0);
+
+            }
+            else if (key == 'l') {
+                Mat dst(img.size(), CV_8UC3);
+                filter.blurQuantize(img, dst, 15);
+                output = dst;
+            }
+            else if (key == 'c') {
+                Mat dst(img.size(), CV_8UC3);
+                filter.cartoon(img, dst, 18, 25);
+                output = dst;
+            }
+
+            imshow("Display window", output);
+
+            }
 	
 	return 0;
 
